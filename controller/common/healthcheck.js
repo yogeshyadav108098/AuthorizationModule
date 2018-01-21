@@ -1,5 +1,8 @@
 'use strict';
 
+const _ = require('lodash');
+const ResponseCodes = require('../../helpers/response_code');
+
 class HealthCheck {
 
     constructor(options, controller) {
@@ -19,8 +22,13 @@ class HealthCheck {
             result: 'OK'
         };
 
+        _.set(req, 'last_middleware_response', {
+            status: ResponseCodes.OK.status,
+            respToSend: responseMessage
+        });
+
         self.logger.info('Status check : Working fine');
-        return res.status(200).json(responseMessage);
+        return next();
     }
 }
 

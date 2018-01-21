@@ -52,12 +52,17 @@ App.use(BodyParser.urlencoded({
 _.set(App, 'PORT', process.env.PORT || ServiceConfig.PORT);
 _.set(App, 'NODE_ENV', process.env.NODE_ENV || ServiceConfig.NODE_ENV);
 
-
 //Set All static files path
 App.use(Express.static('apiDocs'));
 
 // Add Request Id for every request to thread storage
 App.use(ThreadStorageHelpers.addRequestId);
+
+// Log Request Received
+App.use(function (req, res, next) {
+    Logger.info(req.method + ' ' + req.url);
+    return next();
+});
 
 // Route log with basic info
 Morgan.token('user', (req, res) => {

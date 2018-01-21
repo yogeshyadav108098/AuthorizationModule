@@ -14,6 +14,8 @@ module.exports = function (app, controllerObject) {
      */
     app.get('/_status',
         controllerObject.HealthCheck.healthCheck.bind(controllerObject.HealthCheck),
+        controllerObject.Response.setResponse.bind(controllerObject.Response),
+        controllerObject.Response.sendResponse.bind(controllerObject.Response),
         controllerObject.Error.handleError.bind(controllerObject.Error)
     );
 
