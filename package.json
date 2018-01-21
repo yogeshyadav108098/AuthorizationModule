@@ -1,0 +1,35 @@
+{
+    "name": "authorizationmodule",
+    "version": "1.0.0",
+    "description": "Authorization Module",
+    "main": "app.js",
+    "directories": {
+        "lib": "lib"
+    },
+    "dependencies": {
+        "continuation-local-storage": "^3.2.1",
+        "express": "^4.16.2",
+        "express-session": "^1.15.6",
+        "lodash": "^4.17.4",
+        "morgan": "^1.9.0",
+        "node-uuid": "^1.4.8",
+        "request": "^2.83.0",
+        "winston": "^2.4.0",
+        "winston-daily-rotate-file": "^1.7.2",
+        "yargs": "^10.1.1"
+    },
+    "devDependencies": {},
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/yogeshyadav108098/AuthorizationModule.git"
+    },
+    "author": "Yogesh Yadav",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/yogeshyadav108098/AuthorizationModule/issues"
+    },
+    "homepage": "https://github.com/yogeshyadav108098/AuthorizationModule#readme"
+}

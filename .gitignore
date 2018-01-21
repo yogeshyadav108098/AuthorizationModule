@@ -57,3 +57,10 @@ typings/
 # dotenv environment variables file
 .env
 
+# Visual Studio Code
+.vscode
+
+# ApiDocs
+apiDocs
+
+package-lock.json
