@@ -11,10 +11,11 @@
         "cls-bluebird": "^2.1.0",
         "cls-middleware": "^1.1.0",
         "cls-mongoose": "^2.0.1",
-        "cls-mysql": "^1.0.3",
         "cls-q": "^1.1.0",
         "cls-redis": "^1.0.3",
         "continuation-local-storage": "^3.2.1",
+        "eslint": "^4.18.2",
+        "eslint-config-google": "^0.9.1",
         "express": "^4.16.2",
         "express-session": "^1.15.6",
         "json2csv": "^3.11.5",
@@ -22,18 +23,32 @@
         "mongoose": "^5.0.1",
         "morgan": "^1.9.0",
         "mysql": "^2.15.0",
-        "node-uuid": "^1.4.8",
+        "nyc": "^11.4.1",
         "q": "^1.5.1",
         "rc": "^1.2.4",
         "redis": "^2.8.0",
         "request": "^2.83.0",
+        "swagger-jsdoc": "^1.9.7",
+        "uuid": "^3.2.1",
         "winston": "^2.4.0",
         "winston-daily-rotate-file": "^1.7.2",
         "yargs": "^10.1.1"
     },
-    "devDependencies": {},
+    "devDependencies": {
+        "mocha": "^5.0.4",
+        "should": "^13.2.1"
+    },
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "test": "nyc --reporter=html --reporter=text --all mocha --recursive test/",
+        "testChangedFiles": "nyc --reporter=html --reporter=text mocha ",
+        "prejshint": "echo Running JSHint. This might take a while...",
+        "jshint": "jshint .",
+        "preeslint": "echo Running ESLint. This might take a while...",
+        "eslint": "eslint --cache-location '.eslintcache/' --cache --fix .",
+        "preswagger": "echo Generating swagger docs. This should not take much time...",
+        "swagger": "node resources/scripts/swagger-generator",
+        "postswagger": "git add public/swagger/swagger.json",
+        "localtests": "echo 'Alias for npm test.' && npm test"
     },
     "repository": {
         "type": "git",
@@ -41,6 +56,12 @@
     },
     "author": "Yogesh Yadav",
     "license": "ISC",
+    "pre-commit": [
+        "swagger",
+        "jshint",
+        "eslint",
+        "test"
+    ],
     "bugs": {
         "url": "https://github.com/yogeshyadav108098/AuthorizationModule/issues"
     },

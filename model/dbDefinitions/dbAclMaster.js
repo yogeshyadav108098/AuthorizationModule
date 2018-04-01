@@ -1,6 +1,6 @@
 'use strict';
 
-var dbAclMasterConfigs = {
+const dbAclMasterConfigs = {
     development: {
         host: 'localhost',
         port: 27017,
@@ -29,6 +29,6 @@ var dbAclMasterConfigs = {
     }
 };
 
-var dbAclMaster = dbAclMasterConfigs[process.env.NODE_ENV || 'development'];
+const dbAclMaster = dbAclMasterConfigs[process.env.NODE_ENV || 'development'];
 
 module.exports = require('rc')('dbAclMaster', dbAclMaster);

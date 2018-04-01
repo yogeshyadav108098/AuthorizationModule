@@ -1,60 +1,76 @@
 'use strict';
 
+const Q = require('q');
 const _ = require('lodash');
-const JsonToCsv = require('json2csv');
+const JsonToCsv = require('json2csv'); // Function
+
+const Logger = require('../../lib/logger').getInstance();
 const ResponseCodes = require('../../helpers/response_code');
 
+const filePrefix = 'Response Controller:';
 class Response {
-
     constructor(options, controller) {
-        let self = this;
-        self.logger = controller.logger;
+        let functionPrefix = 'Constructor:';
+        Logger.info(filePrefix, functionPrefix, 'Constructing...');
         return;
     }
 
     init(options) {
-        return;
+        let functionPrefix = 'Init:';
+        Logger.info(filePrefix, functionPrefix, 'Initiating...');
+        return Q.resolve();
     }
 
     setResponse(req, res, next) {
-        let self = this;
-        req.response = _.get(req, 'last_middleware_response.respToSend');
-        req.status = _.get(req, 'last_middleware_response.status');
-        self.logger.info('Setting Response : ' + JSON.stringify(req.response) + ' and status : ' + req.status);
+        let functionPrefix = 'Set Response:';
+        req.response = _.get(req, 'lastMiddlewareResponse.respToSend', ResponseCodes.INTERNAL_SERVER_ERROR.message);
+        req.status = _.get(req, 'lastMiddlewareResponse.status', ResponseCodes.INTERNAL_SERVER_ERROR.status);
+        Logger.info(filePrefix, functionPrefix, JSON.stringify(req.response), ' and status : ', req.status);
         return next();
     }
 
     sendResponse(req, res, next) {
-        let self = this;
-        self.logger.info('Sending Response : ' + JSON.stringify(req.response) + ' and status : ' + req.status);
-        return res.status(req && req.status || 200).send(req && req.response);
+        let functionPrefix = 'Send Response:';
+        if (!req.response || !req.status) {
+            return this.sendFailure(next, ResponseCodes.custom({
+                message: 'Status is not set till now, yet send Response Called',
+                status: ResponseCodes.INTERNAL_SERVER_ERROR.status,
+                code: ResponseCodes.INTERNAL_SERVER_ERROR.code
+            }));
+        }
+        Logger.info(filePrefix, functionPrefix, JSON.stringify(req.response), ' and status : ', req.status);
+        return res.status((req && req.status) || 200).send(req && req.response);
     }
 
     sendFailure(next, responseCode) {
+        let functionPrefix = 'Send Failure:';
         let error = new Error();
-        error.message = _.get(responseCode, 'message') || "Unknown error occured";
-        error.status = _.get(responseCode, 'status') || 500;
-        error.code = _.get(responseCode, 'code');
+        error.message = _.get(responseCode, 'message', ResponseCodes.INTERNAL_SERVER_ERROR.message);
+        error.status = _.get(responseCode, 'status', ResponseCodes.INTERNAL_SERVER_ERROR.status);
+        error.code = _.get(responseCode, 'code', ResponseCodes.INTERNAL_SERVER_ERROR.code);
+        Logger.info(filePrefix, functionPrefix, error.message);
         return next(error);
     }
 
     sendResponseInCSV(req, res, next) {
+        let functionPrefix = 'Send Response InCSV:';
         let self = this;
-        let json_data = req.response;
-        let fileName = req.fileNameToSend || ("download_" + new Date().toISOString());
+        let jsonData = req.response;
+        let fileName = req.fileNameToSend || 'download_' + new Date().toISOString();
 
-        if (typeof (json_data) !== 'object') {
+        if (typeof jsonData !== 'object') {
+            Logger.error(filePrefix, functionPrefix, 'JSON Content should be either object or array, given is none');
             return self.sendFailure(next, ResponseCodes.INVALID_JSON_CONTENT);
         }
 
-        if (!json_data.length) {
-            json_data = [json_data];
+        if (!jsonData.length) {
+            jsonData = [jsonData];
         }
 
         try {
             res.set('Content-Disposition', 'attachment; filename="' + fileName + '.csv"');
-            let csv_data = JsonToCsv(json_data);
-            res.write(csv_data);
+            let csvData = new JsonToCsv(jsonData);
+            res.write(csvData);
             return res.end();
         } catch (err) {
             return self.sendFailure(next, ResponseCodes.UNABLE_TO_PROCESS);

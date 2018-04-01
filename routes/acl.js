@@ -1,7 +1,8 @@
 'use strict';
 
-module.exports = function (app, controllerObject) {
+const {bind} = require('../lib/utils').getInstance();
 
+module.exports = function(app, controllerObject) {
     /**
      * @api {post} /user/add Add
      * @apiName CreateUser
@@ -9,7 +10,7 @@ module.exports = function (app, controllerObject) {
      *
      * @apiParam {String} email Email
      * @apiParam {Number} phone Phone
-     * 
+     *
      *
      * @apiSuccessExample Success-Response:
      *   {
@@ -17,7 +18,10 @@ module.exports = function (app, controllerObject) {
      *        result: User created successfully
      *   }
      */
-    // app.post('/authorization/v1/user/add', );
-
-
+    app.post('/authorization/v1/user/add',
+        bind(controllerObject.Acl.user.basic, 'create'),
+        bind(controllerObject.Response, 'setResponse'),
+        bind(controllerObject.Response, 'sendResponse'),
+        bind(controllerObject.Error, 'handleError')
+    );
 };

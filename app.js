@@ -1,5 +1,6 @@
 'use strict';
 
+const Q = require('q');
 const _ = require('lodash');
 const Yargs = require('yargs');
 const Morgan = require('morgan');
@@ -22,8 +23,7 @@ let Argv = Yargs.usage('Usage: $0 [options]')
     .demandOption(['l'])
     .help('h')
     .alias('h', 'help')
-    .epilog('copyright 2018')
-    .argv;
+    .epilog('copyright 2018').argv;
 
 // Set environment variables to App
 _.set(process.env, 'PORT', Argv.PORT);
@@ -31,35 +31,35 @@ _.set(process.env, 'NODE_ENV', Argv.NODE_ENV);
 _.set(process.env, 'LOG_PATH', Argv.LOG_PATH);
 
 // Internal
-const Logger = require('./lib/logger');
-const ServiceConfig = require('./config/service');
+const Logger = require('./lib/logger').getInstance();
 const ThreadStorageHelpers = require('./helpers/thread_storage');
 
 let Controller = require('./controller');
 
 // Initialize Express App
 let App = Express();
-App.use(BodyParser.json({
-    limit: '10mb'
-}));
-App.use(BodyParser.urlencoded({
-    extended: true, // will select basic querystring module to encode/decode over qs which isnt supported by all browsers
-    limit: '10mb',
-    parameterLimit: '5000'
-}));
+App.use(
+    BodyParser.json({
+        limit: '10mb'
+    })
+);
+App.use(
+    BodyParser.urlencoded({
+        extended: true, // will select basic querystring module to encode/decode
+        // over qs which isnt supported by all browsers
+        limit: '10mb',
+        parameterLimit: '5000'
+    })
+);
 
-// Set environment variables to App
-_.set(App, 'PORT', process.env.PORT || ServiceConfig.PORT);
-_.set(App, 'NODE_ENV', process.env.NODE_ENV || ServiceConfig.NODE_ENV);
-
-//Set All static files path
+// Set All static files path
 App.use(Express.static('apiDocs'));
 
 // Add Request Id for every request to thread storage
 App.use(ThreadStorageHelpers.addRequestId);
 
 // Log Request Received
-App.use(function (req, res, next) {
+App.use(function(req, res, next) {
     Logger.info(req.method + ' ' + req.url);
     return next();
 });
@@ -69,18 +69,34 @@ Morgan.token('user', (req, res) => {
     let userinfo = req.ip;
     return userinfo;
 });
-App.use(Morgan(":method :url :status :res[Content-Length] :response-time ms :user", {
-    stream: Logger.stream()
-}));
+App.use(
+    Morgan(':method :url :status :res[Content-Length] :response-time ms :user', {
+        stream: Logger.stream()
+    })
+);
 
 // Create controller Object
-let controller_options = {};
-let ControllerObject = new Controller(controller_options);
+let controllerOptions = {};
+let ControllerObject = new Controller(controllerOptions);
 
-// Expose Routes
-require('./routes')(App, ControllerObject);
+new Q(undefined)
+    .then(function() {
+        // Init Controller
+        return ControllerObject.init(controllerOptions);
+    })
+    .then(function() {
+        // Expose Routes
+        require('./routes')(App, ControllerObject);
 
-// Run the service
-App.listen(_.get(App, 'PORT'), () => {
-    Logger.info(`Successfully listening to port ${_.get(App, 'PORT')} and running in ${_.get(App, 'NODE_ENV')} mode`);
-});
+        // Run the service
+        App.listen(_.get(process.env, 'PORT'), () => {
+            Logger.info(
+                'Successfully listening to port ' + _.get(process.env, 'PORT'),
+                'and running in ' + _.get(process.env, 'NODE_ENV') + ' mode');
+        });
+    })
+    .fail(function(error) {
+        Logger.error('Service could not be started, check error');
+        Logger.error(error);
+        process.exit(1);
+    });

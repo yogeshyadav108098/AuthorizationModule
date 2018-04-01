@@ -1,7 +1,6 @@
 'use strict';
 
 module.exports = {
-
     // 2XX
     OK: {
         code: 'OK',
@@ -51,6 +50,11 @@ module.exports = {
         status: 401,
         message: 'User is not authorized'
     },
+    NO_TOKEN_USER_UNAUTHORIZED: {
+        code: 'NO_TOKEN_USER_UNAUTHORIZED',
+        status: 401,
+        message: 'No  token or cookie to authorize user'
+    },
 
     ROLE_NOT_FOUND: {
         code: 'ROLE_NOT_FOUND',
@@ -83,7 +87,7 @@ module.exports = {
     UNABLE_TO_PROCESS: {
         code: 'UNABLE_TO_PROCESS',
         status: 422,
-        message: 'UNABLE_TO_PROCESS'
+        message: 'Unable to process given request'
     },
 
     TRANSACTION_FAILED: {
@@ -92,12 +96,21 @@ module.exports = {
         message: 'Transaction failed'
     },
 
-    custom: function (message, status, code) {
+    INTERNAL_SERVER_ERROR: {
+        code: 'INTERNAL_SERVER_ERROR',
+        status: 500,
+        message: 'Unexpected error occurred, Please report'
+    },
+
+    custom: function(message, status, code) {
+        message = message || 'Unexpected error occurred, Please report';
+        status = status || 422;
+        code = code || 'UNABLE_TO_PROCESS';
 
         let response = {
-            status: status || 500,
-            message: message,
-            code: code
+            message,
+            status,
+            code
         };
         return response;
     }

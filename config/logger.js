@@ -7,8 +7,15 @@ module.exports = {
     },
 
     FILE: {
-        NAME: 'AuthorizationService',
-        FILE_NAME: 'AuthorizationService.log',
-        LOG_LEVEL: 'debug'
+        JSON: {
+            NAME: 'AuthorizationService-JSONLogger',
+            FILE_NAME: 'AuthorizationService-json.log',
+            LOG_LEVEL: 'debug'
+        },
+        PRETTY: {
+            NAME: 'AuthorizationService-PrettyLogger',
+            FILE_NAME: 'AuthorizationService-pretty.log',
+            LOG_LEVEL: 'debug'
+        }
     }
 };

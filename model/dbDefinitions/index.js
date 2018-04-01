@@ -1,23 +1,68 @@
 'use strict';
 
-var _ = require('lodash');
+const Q = require('q');
+const _ = require('lodash');
+const Logger = require('../../lib/logger').getInstance();
 
-var allDBs = {};
 
-function defineDB(name) {
-    var propName = name;
+const filePrefix = 'AllDBs Model:';
+class AllDbBs {
+    constructor(options, controller) {
+        let functionPrefix = 'Constructor:';
+        let self = this;
+        Logger.info(filePrefix, functionPrefix, 'Constructing...');
+        self.allDBs = {};
+    }
 
-    Object.defineProperty(allDBs, propName, {
-        get: function lazydefine() {
-            if (!allDBs[propName]) {
-                allDBs[propName] = require('./db')(require('./' + name));
-            }
-            return allDBs[propName];
-        }
-    });
+    init(options) {
+        let functionPrefix = 'Init:';
+        let self = this;
+        Logger.info(filePrefix, functionPrefix, 'Initiating...');
+
+        let deferred = Q.defer();
+        new Q(undefined)
+            .then(function() {
+                Logger.debug(filePrefix, functionPrefix, 'Loading dbAclMaster');
+                return self.defineDB('dbAclMaster');
+            })
+            .then(function() {
+                Logger.debug(filePrefix, functionPrefix, 'All DBs successfully loaded');
+                return deferred.resolve();
+            })
+            .fail(function(error) {
+                Logger.error(filePrefix, functionPrefix, error);
+                return deferred.reject(error);
+            });
+        return deferred.promise;
+    }
+
+    defineDB(name) {
+        let functionPrefix = 'DefineDB:';
+        let self = this;
+        let deferred = Q.defer();
+
+        new Q(undefined)
+            .then(function() {
+                return require('./db')(require('./' + name));
+            })
+            .then(function(response) {
+                Logger.debug(filePrefix, functionPrefix, 'Setting in all Dbs', name);
+                _.set(self.allDBs, name, response);
+                return deferred.resolve();
+            })
+            .fail(function(error) {
+                Logger.error(filePrefix, functionPrefix, error);
+                return deferred.reject(error);
+            });
+        return deferred.promise;
+    }
 }
 
-defineDB('dbAclSlave');
-defineDB('dbAclMaster');
+let dbInstance;
+module.exports.getInstance = function() {
+    if (!dbInstance) {
+        dbInstance = new AllDbBs();
+    }
 
-module.exports = allDBs;
+    return dbInstance;
+};

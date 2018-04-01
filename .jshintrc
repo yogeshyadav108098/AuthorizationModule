@@ -1,4 +1,12 @@
 {
+    "camelcase": false,
+    "curly": true,
+    "eqeqeq": true,
+    "maxdepth": 4,
+    "eqnull": true,
+    "funcscope": true,
     "node": true,
+    "mocha": true,
+    "globalstrict": true,
     "esversion": 6
 }

@@ -1,35 +1,37 @@
 'use strict';
 
+const Q = require('q');
 const _ = require('lodash');
+
+const Logger = require('../../lib/logger').getInstance();
 const ResponseCodes = require('../../helpers/response_code');
 
+const filePrefix = 'HealthCheck Controller:';
 class HealthCheck {
-
     constructor(options, controller) {
-        let self = this;
-        self.logger = controller.logger;
+        let functionPrefix = 'Constructor:';
+        Logger.info(filePrefix, functionPrefix, 'Constructing...');
         return;
     }
 
     init(options) {
-        return;
+        let functionPrefix = 'Init:';
+        Logger.info(filePrefix, functionPrefix, 'Initiating...');
+        return Q.resolve();
     }
 
     healthCheck(req, res, next) {
-        let self = this;
-
         let responseMessage = {
             result: 'OK'
         };
 
-        _.set(req, 'last_middleware_response', {
+        _.set(req, 'lastMiddlewareResponse', {
             status: ResponseCodes.OK.status,
             respToSend: responseMessage
         });
 
-        self.logger.info('Status check : Working fine');
+        Logger.info('HealthCheck is working fine');
         return next();
     }
 }
-
 module.exports = HealthCheck;

@@ -1,0 +1,16 @@
+{
+    "info": {
+        "title": "Authorization Service Public APIs",
+        "version": "1.0.0",
+        "description": "These APIs are to be consumed by clients: web, android and ios apps"
+    },
+    "host": "authorization.csr.com",
+    "basePath": "/papi",
+    "swagger": "2.0",
+    "paths": {},
+    "definitions": {},
+    "responses": {},
+    "parameters": {},
+    "securityDefinitions": {},
+    "tags": []
+}
